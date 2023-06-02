@@ -125,6 +125,38 @@ async function checkGetPointsCollectNFT(authToken, proxy) {
     console.log(colors.red('You\'re not qualified to claim points (Collect an EssenceNFT - 200FP)'))
   }
 
+  jsonData = {
+    query: "\n    query checkEngagementQualified($engagementId: ID!) {\n  checkEngagementQualified(engagementId: $engagementId) {\n    status\n    qualified\n    points\n  }\n}\n    ",
+    variables: {
+      engagementId: "c6a57cf2-d4e8-4676-97d7-5d32b07526ed",
+    },
+    operationName: 'checkEngagementQualified',
+  }
+
+  response = await axios.post('https://api.cyberconnect.dev/profile/', jsonData, {
+    headers: rewardsHeaders,
+    httpAgent: new HttpsProxyAgent(`http://${proxy}`)
+  })
+
+  if (response.data.data.checkEngagementQualified.qualified) {
+    jsonData = {
+      query: "\n    mutation claimPoints($id: ID!) {\n  claimPoints(input: {engagementId: $id}) {\n    status\n  }\n}\n    ",
+      variables: {
+        id: 'c6a57cf2-d4e8-4676-97d7-5d32b07526ed',
+      },
+      operationName: 'claimPoints',
+    }
+
+    await axios.post('https://api.cyberconnect.dev/profile/', jsonData, {
+      headers: rewardsHeaders,
+      httpAgent: new HttpsProxyAgent(`http://${proxy}`)
+    })
+
+    console.log(colors.green('Successfully claimed referrals points'))
+  } else {
+    console.log(colors.yellow('You\'re have not referrals'))
+  }
+
   /*
   jsonData = {
     query: "\n    query checkEngagementQualified($engagementId: ID!) {\n  checkEngagementQualified(engagementId: $engagementId) {\n    status\n    qualified\n    points\n  }\n}\n    ",
@@ -211,7 +243,7 @@ async function start () {
           console.log(colors.magenta(`Total account points: ${result}`));
         }
         console.log(`==============================================================================================`);
-      }, 5000 * i); // Задержка в 5 секунд умножается на номер итерации цикла
+      }, 5000 * i)
     }
   } else {
     if (privatesArr.length > proxiesArr.length) {
