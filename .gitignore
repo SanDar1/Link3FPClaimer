@@ -130,5 +130,5 @@ dist
 .pnp.*
 
 #custom
-privates.txt
-proxies.txt
+#privates.txt
+#proxies.txt
